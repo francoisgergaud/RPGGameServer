@@ -13,6 +13,11 @@ public class NewPlayerRegistered {
     private String id;
 
     /**
+     * the character's appearance's identifier
+     */
+    private Integer characterId;
+
+    /**
      * the player´ name
      */
     private String name;
@@ -28,6 +33,14 @@ public class NewPlayerRegistered {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getCharacterId() {
+        return characterId;
+    }
+
+    public void setCharacterId(Integer characterId) {
+        this.characterId = characterId;
     }
 
     public String getName() {

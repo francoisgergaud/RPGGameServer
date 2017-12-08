@@ -11,6 +11,11 @@ public class RegisterPlayerInput {
     private String id;
 
     /**
+     * the character's appearance'sidentifier
+     */
+    private Integer characterId;
+
+    /**
      * @return the player´ s identifier
      */
     public String getId() {
@@ -23,5 +28,13 @@ public class RegisterPlayerInput {
      */
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getCharacterId() {
+        return characterId;
+    }
+
+    public void setCharacterId(Integer characterId) {
+        this.characterId = characterId;
     }
 }

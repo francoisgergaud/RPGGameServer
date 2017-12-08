@@ -57,12 +57,13 @@ public class RegisterPlayerController {
     public ResponseEntity<RegisterPlayerOutput> registerPlayer(@RequestBody RegisterPlayerInput registerPlayer) {
         RegisterPlayerOutput result = new RegisterPlayerOutput();
         //assign an id for the user, a character appearance, a position
-        Character character = worldService.addCharacter(registerPlayer.getId());
+        Character character = worldService.addCharacter(registerPlayer.getId(), registerPlayer.getCharacterId());
         result.setPlayerId(character.getId());
         result.setMap(worldService.getWorldMap());
         result.setAnimatedElements(worldService.getCharacters());
         NewPlayerRegistered newPlayerRegistered = new NewPlayerRegistered();
         newPlayerRegistered.setId(character.getId());
+        newPlayerRegistered.setCharacterId(character.getCharacterId());
         newPlayerRegistered.setName(registerPlayer.getId());
         newPlayerRegistered.setCurrentState(character.getCurrentState());
         //notify all the other players

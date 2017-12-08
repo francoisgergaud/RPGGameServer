@@ -62,15 +62,17 @@ public class WorldService {
     /**
      * generate an id for the character and add it to the map
      * @param characterName the character name
+     * @param  characterAppearanceId the character's appearance'sidentifier
      * @return the character created
      */
-    public Character addCharacter(String characterName){
+    public Character addCharacter(String characterName, Integer characterAppearanceId){
         Character character = new Character();
         Date now = new Date();
         Long timestamp = now.getTime();
         String id = timestamp.toString();
         character.setName(characterName);
         character.setId(id);
+        character.setCharacterId(characterAppearanceId);
         character.setCurrentState(new CurrentState());
         character.getCurrentState().setPosition(new Position());
         character.getCurrentState().getPosition().setx(0);
