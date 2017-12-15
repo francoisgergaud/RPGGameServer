@@ -2,16 +2,18 @@ package rpgserver.service;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import rpgserver.service.models.Bloc;
+import rpgserver.service.models.*;
 import rpgserver.service.models.Character;
-import rpgserver.service.models.CurrentState;
-import rpgserver.service.models.Position;
+
+import javax.annotation.PostConstruct;
 
 /**
  * contains information about the world and manage concurrent access to it
@@ -35,27 +37,35 @@ public class WorldService {
     public static final Integer MAP_HEIGHT = 50;
 
     /**
+     * the world-generator
+     */
+    @Autowired
+    @Qualifier("randomWorldGenerator")
+    private IWorldGenerator worldGenerator;
+
+    /**
      * the world-map
      */
     private Bloc[][] worldMap;
+
+    /**
+     * list of world-elements (trees, houses etc...)
+     */
+    private List<WorldElement> worldElements;
 
     /**
      * map of all the players
      */
     private Map<String,Character> characters;
 
+
     /**
-     * constructor: initialize the map and an empty character map
+     * post-constructor: initialize the map and an empty character map
      */
-    public WorldService(){
-        worldMap = new Bloc[MAP_WIDTH][MAP_HEIGHT];
-        for(int i=0; i < MAP_WIDTH; i++){
-            for(int j=0; j < MAP_HEIGHT; j++){
-                Bloc bloc = new Bloc();
-                bloc.setSpriteId(ThreadLocalRandom.current().nextInt(0,  10) < 7 ? 0 : 1 );
-                worldMap[i][j] = bloc;
-            }
-        }
+    @PostConstruct
+    private void initialize(){
+        worldMap = worldGenerator.generateWorldMap(MAP_WIDTH,MAP_HEIGHT);
+        worldElements = worldGenerator.generateWorldElements(MAP_WIDTH,MAP_HEIGHT);
         characters = new HashMap<>();
     }
 
@@ -102,5 +112,9 @@ public class WorldService {
 
     public Map<String, Character> getCharacters() {
         return characters;
+    }
+
+    public List<WorldElement> getWorldElements() {
+        return worldElements;
     }
 }

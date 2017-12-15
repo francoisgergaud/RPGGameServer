@@ -2,6 +2,9 @@ package rpgserver.controller.model;
 
 import rpgserver.service.models.Bloc;
 import rpgserver.service.models.Character;
+import rpgserver.service.models.WorldElement;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,6 +21,11 @@ public class RegisterPlayerOutput {
      * the map section to be seen by the player
      */
     private Bloc[][] map;
+
+    /**
+     * list of world-elements (trees, houses etc...)
+     */
+    private List<WorldElement> worldElements;
 
     /**
      * animated-elements on the world (other players for now)
@@ -46,5 +54,13 @@ public class RegisterPlayerOutput {
 
     public void setAnimatedElements(Map<String, Character> animatedElements) {
         this.animatedElements = animatedElements;
+    }
+
+    public List<WorldElement> getWorldElements() {
+        return worldElements;
+    }
+
+    public void setWorldElements(List<WorldElement> worldElements) {
+        this.worldElements = worldElements;
     }
 }

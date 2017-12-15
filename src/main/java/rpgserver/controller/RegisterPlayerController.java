@@ -60,6 +60,7 @@ public class RegisterPlayerController {
         Character character = worldService.addCharacter(registerPlayer.getId(), registerPlayer.getCharacterId());
         result.setPlayerId(character.getId());
         result.setMap(worldService.getWorldMap());
+        result.setWorldElements(worldService.getWorldElements());
         result.setAnimatedElements(worldService.getCharacters());
         NewPlayerRegistered newPlayerRegistered = new NewPlayerRegistered();
         newPlayerRegistered.setId(character.getId());

@@ -10,11 +10,29 @@ public class Bloc {
      */
     private Integer spriteId;
 
+    /**
+     * the tile´ identifier
+     */
+    private Integer tileId;
+
+    public Bloc(){
+        this.tileId = -1;
+        this.spriteId = -1;
+    }
+
     public Integer getSpriteId() {
         return spriteId;
     }
 
     public void setSpriteId(Integer spriteId) {
         this.spriteId = spriteId;
+    }
+
+    public Integer getTileId() {
+        return tileId;
+    }
+
+    public void setTileId(Integer tileId) {
+        this.tileId = tileId;
     }
 }
