@@ -66,6 +66,9 @@ public class WorldService {
     private void initialize(){
         worldMap = worldGenerator.generateWorldMap(MAP_WIDTH,MAP_HEIGHT);
         worldElements = worldGenerator.generateWorldElements(MAP_WIDTH,MAP_HEIGHT);
+        for(WorldElement worldElement : worldElements){
+            worldMap[worldElement.getPosition().getx()][worldElement.getPosition().gety()].setSpriteId(worldElement.getSpriteId());
+        }
         characters = new HashMap<>();
     }
 

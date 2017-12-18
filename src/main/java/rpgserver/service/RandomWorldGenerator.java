@@ -30,12 +30,10 @@ public class RandomWorldGenerator implements rpgserver.service.IWorldGenerator {
                 int randomNumber = ThreadLocalRandom.current().nextInt(0,  100);
                 if(randomNumber < 90){
                     bloc.setTileId(0);
-                    if(randomNumber < 10){
-                        bloc.setSpriteId(0);
-                    }
                 }else{
                     bloc.setTileId(1);
                 }
+                bloc.setSpriteId(null);
                 worldMap[i][j] = bloc;
             }
         }
