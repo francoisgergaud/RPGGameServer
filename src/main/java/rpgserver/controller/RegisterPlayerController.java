@@ -18,6 +18,7 @@ import rpgserver.controller.model.RegisterPlayerInput;
 import rpgserver.service.WorldService;
 import rpgserver.service.models.Character;
 
+import java.util.Date;
 import java.util.Map;
 
 @Controller
@@ -33,17 +34,17 @@ public class RegisterPlayerController {
     /**
      * the world's content
      */
-    @Autowired
     private WorldService worldService;
 
     /**
      * asynchronous message sender (use to send to web-socket)
-     *
-     * @param template
+     * @param worldService the world services
+     * @param template the Stomp message-template
      */
     @Autowired
-    public RegisterPlayerController(SimpMessagingTemplate template) {
+    public RegisterPlayerController(WorldService worldService,SimpMessagingTemplate template) {
         this.template = template;
+        this.worldService = worldService;
     }
 
     /**
@@ -57,7 +58,10 @@ public class RegisterPlayerController {
     public ResponseEntity<RegisterPlayerOutput> registerPlayer(@RequestBody RegisterPlayerInput registerPlayer) {
         RegisterPlayerOutput result = new RegisterPlayerOutput();
         //assign an id for the user, a character appearance, a position
-        Character character = worldService.addCharacter(registerPlayer.getId(), registerPlayer.getCharacterId());
+        Date now = new Date();
+        Long timestamp = now.getTime();
+        String uniqueId = timestamp.toString();
+        Character character = worldService.addCharacter(uniqueId, registerPlayer.getId(), registerPlayer.getCharacterId());
         result.setPlayerId(character.getId());
         result.setMap(worldService.getWorldMap());
         result.setWorldElements(worldService.getWorldElements());

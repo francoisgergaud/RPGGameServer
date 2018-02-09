@@ -39,8 +39,6 @@ public class WorldService {
     /**
      * the world-generator
      */
-    @Autowired
-    @Qualifier("randomWorldGenerator")
     private IWorldGenerator worldGenerator;
 
     /**
@@ -59,17 +57,22 @@ public class WorldService {
     private Map<String,Character> characters;
 
 
+    @Autowired
+    public WorldService(@Qualifier("randomWorldGenerator") IWorldGenerator worldGenerator){
+        this.worldGenerator = worldGenerator;
+        characters = new HashMap<>();
+    }
+
     /**
      * post-constructor: initialize the map and an empty character map
      */
     @PostConstruct
-    private void initialize(){
+    public void buildWorld(){
         worldMap = worldGenerator.generateWorldMap(MAP_WIDTH,MAP_HEIGHT);
         worldElements = worldGenerator.generateWorldElements(MAP_WIDTH,MAP_HEIGHT);
         for(WorldElement worldElement : worldElements){
             worldMap[worldElement.getPosition().getx()][worldElement.getPosition().gety()].setSpriteId(worldElement.getSpriteId());
         }
-        characters = new HashMap<>();
     }
 
     /**
@@ -78,11 +81,8 @@ public class WorldService {
      * @param  characterAppearanceId the character's appearance'sidentifier
      * @return the character created
      */
-    public Character addCharacter(String characterName, Integer characterAppearanceId){
+    public Character addCharacter(String id, String characterName, Integer characterAppearanceId){
         Character character = new Character();
-        Date now = new Date();
-        Long timestamp = now.getTime();
-        String id = timestamp.toString();
         character.setName(characterName);
         character.setId(id);
         character.setCharacterId(characterAppearanceId);
