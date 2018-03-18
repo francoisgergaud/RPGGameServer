@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +22,7 @@ import rpgserver.controller.model.RegisterPlayerInput;
 import rpgserver.service.WorldService;
 import rpgserver.service.models.Character;
 
+import java.security.Principal;
 import java.util.Date;
 import java.util.Map;
 
@@ -72,7 +77,7 @@ public class RegisterPlayerController {
         newPlayerRegistered.setName(registerPlayer.getId());
         newPlayerRegistered.setCurrentState(character.getCurrentState());
         //notify all the other players
-        this.template.convertAndSend("/topics/newPlayer", newPlayerRegistered);
+        this.template.convertAndSend("/topic/newPlayer", newPlayerRegistered);
         return new ResponseEntity<RegisterPlayerOutput>(result, HttpStatus.OK);
     }
 
@@ -81,14 +86,14 @@ public class RegisterPlayerController {
      *
      * @param movePlayerInput information about the player´ movement
      */
-    @RequestMapping(path = "/movePlayer", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> movePlayer(@RequestBody MovePlayerInput movePlayerInput) {
+    @MessageMapping("/movePlayer")
+    public void movePlayer(@Payload MovePlayerInput movePlayerInput, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
         //update the map
         worldService.moveCharacter(movePlayerInput.getId(), movePlayerInput.getCurrentState());
         //notify all the other players
-        this.template.convertAndSend("/topics/movePlayer", movePlayerInput);
-        return new ResponseEntity<String>("", HttpStatus.OK);
+        this.template.convertAndSend("/topic/movePlayer", movePlayerInput);
+        this.template.convertAndSendToUser(headerAccessor.getUser().getName(), "/queue/movePlayer", "message broadcasted to other!", headerAccessor.getMessageHeaders());
     }
 
     @RequestMapping(path = "/ping", method = RequestMethod.GET)

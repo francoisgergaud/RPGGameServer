@@ -87,7 +87,7 @@ public class RegisterPlayerControllerTest {
         input.setId(id);
         input.setCurrentState(currentState);
         RegisterPlayerController registerPlayerController = new RegisterPlayerController(worldService, messageTemplate);
-        registerPlayerController.movePlayer(input);
+        registerPlayerController.movePlayer(null, input);
         //test the service call
         ArgumentCaptor<CurrentState> currentStateArgument = ArgumentCaptor.forClass(CurrentState.class);
         verify(worldService, new Times(1)).moveCharacter(eq(id), currentStateArgument.capture());

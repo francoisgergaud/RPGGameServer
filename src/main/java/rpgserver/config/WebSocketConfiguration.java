@@ -12,13 +12,18 @@ public class WebSocketConfiguration  extends AbstractWebSocketMessageBrokerConfi
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topics");
-        config.setApplicationDestinationPrefixes("/gameServer");
+        config.setApplicationDestinationPrefixes("/app");
+        config.enableSimpleBroker("/topic", "/queue");
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/gameServer-websocket").setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/gameServer")
+                .addInterceptors(new HttpHandshakeInterceptor())
+                .setHandshakeHandler(new CustomHandshakeHandler())
+                .setAllowedOrigins("*")
+                .withSockJS();
     }
 
 }
