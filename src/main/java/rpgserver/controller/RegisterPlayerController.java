@@ -9,22 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import rpgserver.controller.model.MovePlayerInput;
-import rpgserver.controller.model.NewPlayerRegistered;
-import rpgserver.controller.model.RegisterPlayerOutput;
-import rpgserver.controller.model.RegisterPlayerInput;
+import rpgserver.controller.model.*;
 import rpgserver.service.WorldService;
 import rpgserver.service.models.Character;
-
-import java.security.Principal;
-import java.util.Date;
-import java.util.Map;
 
 @Controller
 public class RegisterPlayerController {
@@ -55,30 +47,25 @@ public class RegisterPlayerController {
     /**
      * invoked when a new player joins the game
      *
-     * @param registerPlayer information about the player
+     * @param registerPlayerInput information about the player
      * @return the information about the world
      */
-    @RequestMapping(path = "/registerPlayer", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RegisterPlayerOutput> registerPlayer(@RequestBody RegisterPlayerInput registerPlayer) {
+    @MessageMapping("/registerPlayer")
+    public void registerPlayer(@Payload RegisterPlayerInput registerPlayerInput, SimpMessageHeaderAccessor headerAccessor) {
         RegisterPlayerOutput result = new RegisterPlayerOutput();
-        //assign an id for the user, a character appearance, a position
-        Date now = new Date();
-        Long timestamp = now.getTime();
-        String uniqueId = timestamp.toString();
-        Character character = worldService.addCharacter(uniqueId, registerPlayer.getId(), registerPlayer.getCharacterId());
+        Character character = worldService.addCharacter(headerAccessor.getUser().getName(), registerPlayerInput.getId(), registerPlayerInput.getCharacterId());
         result.setPlayerId(character.getId());
         result.setMap(worldService.getWorldMap());
         result.setWorldElements(worldService.getWorldElements());
-        result.setAnimatedElements(worldService.getCharacters());
+        result.setAnimatedElements(worldService.getCharactersById());
         NewPlayerRegistered newPlayerRegistered = new NewPlayerRegistered();
         newPlayerRegistered.setId(character.getId());
         newPlayerRegistered.setCharacterId(character.getCharacterId());
-        newPlayerRegistered.setName(registerPlayer.getId());
+        newPlayerRegistered.setName(registerPlayerInput.getId());
         newPlayerRegistered.setCurrentState(character.getCurrentState());
         //notify all the other players
+        this.template.convertAndSendToUser(headerAccessor.getUser().getName(), "/queue/registerPlayer", result, headerAccessor.getMessageHeaders());
         this.template.convertAndSend("/topic/newPlayer", newPlayerRegistered);
-        return new ResponseEntity<RegisterPlayerOutput>(result, HttpStatus.OK);
     }
 
     /**
@@ -88,12 +75,26 @@ public class RegisterPlayerController {
      */
     @MessageMapping("/movePlayer")
     public void movePlayer(@Payload MovePlayerInput movePlayerInput, SimpMessageHeaderAccessor headerAccessor) {
-        String sessionId = headerAccessor.getSessionAttributes().get("sessionId").toString();
         //update the map
-        worldService.moveCharacter(movePlayerInput.getId(), movePlayerInput.getCurrentState());
+        worldService.moveCharacter(headerAccessor.getUser().getName(), movePlayerInput.getCurrentState());
         //notify all the other players
         this.template.convertAndSend("/topic/movePlayer", movePlayerInput);
         this.template.convertAndSendToUser(headerAccessor.getUser().getName(), "/queue/movePlayer", "message broadcasted to other!", headerAccessor.getMessageHeaders());
+    }
+
+    /**
+     * invoked when a player moves
+     *
+     * @param chatInput information about the chat's message
+     */
+    @MessageMapping("/chat")
+    public void chat(@Payload ChatInput chatInput, SimpMessageHeaderAccessor headerAccessor) {
+        //get all the destinations:
+        for(String destination : chatInput.getTo()) {
+            String destinationId = worldService.getCharactersByName().get(destination).getId();
+            this.template.convertAndSendToUser(destinationId, "/queue/chat", chatInput.getFrom()
+                    + ": "+chatInput.getMessage());
+        }
     }
 
     @RequestMapping(path = "/ping", method = RequestMethod.GET)

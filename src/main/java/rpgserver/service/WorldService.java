@@ -1,6 +1,5 @@
 package rpgserver.service;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,15 +51,20 @@ public class WorldService {
     private List<WorldElement> worldElements;
 
     /**
-     * map of all the players
+     * map of all the players by internal identfier
      */
-    private Map<String,Character> characters;
-
+    private Map<String,Character> charactersById;
+    /**
+     * map of all the players by name
+     */
+    private Map<String,Character> charactersByName;
 
     @Autowired
     public WorldService(@Qualifier("randomWorldGenerator") IWorldGenerator worldGenerator){
         this.worldGenerator = worldGenerator;
-        characters = new HashMap<>();
+        //manage concurrent hashmap to ensure no duplication when player subscribe
+        charactersById = new HashMap<>();
+        charactersByName = new HashMap<>();
     }
 
     /**
@@ -77,14 +81,15 @@ public class WorldService {
 
     /**
      * generate an id for the character and add it to the map
-     * @param characterName the character name
+     * @param id the character internal-identifier
+     * @param characterName the character name (defined when user log in)
      * @param  characterAppearanceId the character's appearance'sidentifier
      * @return the character created
      */
     public Character addCharacter(String id, String characterName, Integer characterAppearanceId){
         Character character = new Character();
-        character.setName(characterName);
         character.setId(id);
+        character.setName(characterName);
         character.setCharacterId(characterAppearanceId);
         character.setCurrentState(new CurrentState());
         character.getCurrentState().setPosition(new Position());
@@ -94,7 +99,8 @@ public class WorldService {
         character.getCurrentState().setFrame(0);
         character.getCurrentState().setVelocity(5);
         character.getCurrentState().setMoving(false);
-        characters.put(id,character);
+        charactersById.put(id,character);
+        charactersByName.put(characterName, character);
         return character;
     }
 
@@ -105,7 +111,7 @@ public class WorldService {
      */
     public void moveCharacter(String id, CurrentState currentState){
         LOGGER.trace("moving player id: {} to currentState: {}",id, currentState);
-        Character character = characters.get(id);
+        Character character = charactersById.get(id);
         character.setCurrentState(currentState);
     }
 
@@ -113,8 +119,12 @@ public class WorldService {
         return worldMap;
     }
 
-    public Map<String, Character> getCharacters() {
-        return characters;
+    public Map<String, Character> getCharactersById() {
+        return charactersById;
+    }
+
+    public Map<String, Character> getCharactersByName() {
+        return charactersByName;
     }
 
     public List<WorldElement> getWorldElements() {

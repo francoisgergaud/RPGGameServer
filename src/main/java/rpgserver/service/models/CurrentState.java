@@ -65,4 +65,13 @@ public class CurrentState {
     public void setMoving(Boolean moving) {
         this.moving = moving;
     }
+
+    @Override
+    public String toString() {
+        return "CurrentState{" +
+                "position=" + position +
+                ", direction=" + direction +
+                ", moving=" + moving +
+                '}';
+    }
 }

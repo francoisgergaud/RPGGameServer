@@ -65,15 +65,15 @@ public class WorldServiceTest {
         String uniqueId = "fakeId";
         WorldService worldService = new WorldService(worldGenerator);
         worldService.addCharacter(uniqueId, characterName, characterAppearanceId);
-        assertEquals(worldService.getCharacters().get(uniqueId).getName(), characterName);
-        assertEquals(worldService.getCharacters().get(uniqueId).getCharacterId(), characterAppearanceId);
-        assertEquals(worldService.getCharacters().get(uniqueId).getName(), characterName);
-        assertEquals(worldService.getCharacters().get(uniqueId).getCurrentState().getPosition().getx(),0);
-        assertEquals(worldService.getCharacters().get(uniqueId).getCurrentState().getPosition().gety(),0);
-        assertEquals(worldService.getCharacters().get(uniqueId).getCurrentState().getDirection(), new Integer(0));
-        assertEquals(worldService.getCharacters().get(uniqueId).getCurrentState().getMoving(), false);
-        assertEquals(worldService.getCharacters().get(uniqueId).getCurrentState().getFrame(), new Integer(0));
-        assertEquals(worldService.getCharacters().get(uniqueId).getCurrentState().getVelocity(), new Integer(5));
+        assertEquals(worldService.getCharactersById().get(uniqueId).getName(), characterName);
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCharacterId(), characterAppearanceId);
+        assertEquals(worldService.getCharactersById().get(uniqueId).getName(), characterName);
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCurrentState().getPosition().getx(),0);
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCurrentState().getPosition().gety(),0);
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCurrentState().getDirection(), new Integer(0));
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCurrentState().getMoving(), false);
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCurrentState().getFrame(), new Integer(0));
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCurrentState().getVelocity(), new Integer(5));
     }
 
     @Test
@@ -85,6 +85,6 @@ public class WorldServiceTest {
         worldService.addCharacter(uniqueId, characterName, characterAppearanceId);
         CurrentState currentState = new CurrentState();
         worldService.moveCharacter(uniqueId, currentState);
-        assertEquals(worldService.getCharacters().get(uniqueId).getCurrentState(), currentState);
+        assertEquals(worldService.getCharactersById().get(uniqueId).getCurrentState(), currentState);
     }
 }
