@@ -3,6 +3,7 @@ package rpgserver.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +64,8 @@ public class WorldService {
     public WorldService(@Qualifier("randomWorldGenerator") IWorldGenerator worldGenerator){
         this.worldGenerator = worldGenerator;
         //manage concurrent hashmap to ensure no duplication when player subscribe
-        charactersById = new HashMap<>();
-        charactersByName = new HashMap<>();
+        charactersById = new ConcurrentHashMap<>();
+        charactersByName = new ConcurrentHashMap<>();
     }
 
     /**
@@ -129,5 +130,19 @@ public class WorldService {
 
     public List<WorldElement> getWorldElements() {
         return worldElements;
+    }
+
+    /**
+     * remove a character
+     * TODO: should these 2 operations be atomics ?
+     * @param id the identifier of the character
+     */
+    public void removeCharacter(String id) {
+        // must be idempotent as message can send the same message multiple times
+        if(charactersById.containsKey(id)) {
+            Character character = charactersById.get(id);
+            charactersByName.remove(character.getName());
+            charactersById.remove(id);
+        }
     }
 }
