@@ -136,13 +136,16 @@ public class WorldService {
      * remove a character
      * TODO: should these 2 operations be atomics ?
      * @param id the identifier of the character
+     * @return the removed character
      */
-    public void removeCharacter(String id) {
+    public Character removeCharacter(String id) {
         // must be idempotent as message can send the same message multiple times
+        Character result=null;
         if(charactersById.containsKey(id)) {
-            Character character = charactersById.get(id);
-            charactersByName.remove(character.getName());
+            result = charactersById.get(id);
+            charactersByName.remove(result.getName());
             charactersById.remove(id);
         }
+        return result;
     }
 }

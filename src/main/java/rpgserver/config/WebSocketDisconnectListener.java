@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import rpgserver.service.WorldService;
+import rpgserver.service.models.Character;
 
 import java.security.Principal;
 
@@ -28,8 +29,9 @@ public class WebSocketDisconnectListener implements ApplicationListener<SessionD
     @EventListener
     public void onApplicationEvent(SessionDisconnectEvent event) {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
-        Principal principal = event.getUser();
-        worldService.removeCharacter(principal.getName());
+        String id = event.getUser().getName();
+        Character removedCharacter = worldService.removeCharacter(id);
         logger.info("Disconnect event [sessionId: " + sha.getSessionId() + " : close status" + event.getCloseStatus() + "]");
+        template.convertAndSend("/topic/unregisterPlayer",removedCharacter.getId());
     }
 }
